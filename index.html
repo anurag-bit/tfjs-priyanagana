@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Similarity Search</title>
+</head>
+<body>
+    <h1>Image Similarity Search</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="file">Upload an image:</label>
+        <input type="file" name="file" id="file" accept=".jpg, .jpeg, .png" required>
+        <br>
+        <button type="button" onclick="uploadImage()">Search</button>
+    </form>
+
+    <h2>Similar Images</h2>
+    <div id="similarImages"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script>
+        async function uploadImage() {
+            const formData = new FormData(document.getElementById('uploadForm'));
+
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            // Display uploaded image
+            const uploadedImage = document.createElement('img');
+            uploadedImage.src = `data:image/jpeg;base64,${result.uploadedImage}`;
+            document.body.appendChild(uploadedImage);
+
+            // Display similar images
+            const similarImagesDiv = document.getElementById('similarImages');
+            similarImagesDiv.innerHTML = '';
+            result.similarImages.forEach(similarImage => {
+                const imgElement = document.createElement('img');
+                imgElement.src = `data:image/jpeg;base64,${similarImage.image}`;
+                similarImagesDiv.appendChild(imgElement);
+
+                const similarityElement = document.createElement('p');
+                similarityElement.textContent = `Similarity: ${similarImage.similarity.toFixed(4)}`;
+                similarImagesDiv.appendChild(similarityElement);
+            });
+        }
+    </script>
+</body>
+</html>
